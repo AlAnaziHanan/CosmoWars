@@ -14,7 +14,7 @@
         android:id="@+id/imageufo"
         android:src="@drawable/ufo"
         android:layout_centerInParent="true"
-        android:contentDescription="TODO" />
+     />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,5 +49,17 @@
         >
 
     </Button>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/volume_off"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:id="@+id/volume"
+        android:layout_below="@+id/playButton"
+
+     >
+
+    </ImageView>
 
 </RelativeLayout>

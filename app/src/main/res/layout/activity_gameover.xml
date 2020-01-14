@@ -34,7 +34,8 @@
         android:id="@+id/scorerv"
         android:textAlignment="center"
         android:layout_marginTop="50dp"
-        android:layout_marginStart="100dp">
+        android:layout_marginStart="100dp"
+        tools:ignore="RtlHardcoded">
 
         <TextView
             android:layout_width="wrap_content"
@@ -78,60 +79,6 @@
     </RelativeLayout>
 
 
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/scorerv"
-        android:layout_centerHorizontal="true"
-        android:layout_marginLeft="100dp"
-        android:textAlignment="center"
-        android:id="@+id/highscorerv"
-        android:layout_marginStart="100dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/high_score"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:shadowColor="@color/pink"
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="1"
-            android:layout_margin="20dp"
-
-            android:id="@+id/highscoretext"
-            >
-        </TextView>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:textStyle="bold"
-
-            android:shadowColor="@color/pink"
-            android:shadowRadius="2"
-            android:shadowDx="1"
-            android:shadowDy="1"
-            android:layout_margin="20dp"
-
-            android:layout_toRightOf="@+id/highscoretext"
-            android:id="@+id/highscore"
-            android:layout_toEndOf="@+id/highscoretext">
-        </TextView>
-    </RelativeLayout>
-
-
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -141,7 +88,7 @@
         android:textSize="15sp"
         android:textStyle="bold"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/highscorerv"
+        android:layout_below="@+id/scorerv"
         android:text="@string/play"
         >
 

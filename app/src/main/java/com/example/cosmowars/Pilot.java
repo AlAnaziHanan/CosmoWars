@@ -6,13 +6,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
 
-public class Pilot {
-    int x,y,width,height;
-    Bitmap pilot;
+class Pilot {
+    final int x;
+    int y;
+    int width;
+    int height;
+    private Bitmap pilot;
     boolean moveUpwards=false;
     int shootLaser=0;
-    int laserCount=1;
-    private  gameView gameView;
+    private int laserCount=1;
+    private final gameView gameView;
 
     Pilot( gameView gameView, int scy, Resources resources ){
         this.gameView=gameView;
@@ -28,7 +31,7 @@ public class Pilot {
         height/=4;
 
         width*= (int) com.example.cosmowars.gameView.ratioX;
-        height*= (int) com.example.cosmowars.gameView.ratioY;
+        height*= (int)com.example.cosmowars.gameView.ratioY;
 
         pilot=Bitmap.createScaledBitmap ( pilot,width,height,false );
 

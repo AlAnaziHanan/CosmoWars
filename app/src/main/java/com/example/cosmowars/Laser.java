@@ -5,10 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
-public class Laser {
+class Laser {
     int x,y;
     Bitmap laser;
-    int width,height;
+    private int width;
+    private int height;
 
     Laser( Resources resources ){
         laser =BitmapFactory.decodeResource ( resources,R.drawable.laser );

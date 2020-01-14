@@ -20,6 +20,7 @@ public class levelActivity extends AppCompatActivity{
 
         Point point=new Point (  );
         getWindowManager ().getDefaultDisplay ().getSize ( point );
+
         gameView=new gameView ( this, point.x,point.y);
 
         setContentView ( gameView );

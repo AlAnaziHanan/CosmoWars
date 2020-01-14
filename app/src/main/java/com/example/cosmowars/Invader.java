@@ -5,9 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 
-public class Invader {
-    int x=0,y,w,h,invaderCount=1;
-    Bitmap invader;
+class Invader {
+    int x=0;
+    int y;
+    int w;
+    int h;
+    private int invaderCount=1;
+    private Bitmap invader;
 
     //invader speed
     public int speed=20;

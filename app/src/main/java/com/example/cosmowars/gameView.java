@@ -4,10 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -19,31 +23,43 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@SuppressLint("ViewConstructor")
 public class gameView extends SurfaceView implements Runnable {
 
     private Thread thread;
     private boolean playing,gameOver=false;
-    private background bg1;
+    private final background bg1;
 
-    private int scX;
-    private int scY;
+    private final int scX;
+    private final int scY;
     private int score=0;
-    private Paint paint;
+    private final Paint paint;
+
+    private final Paint scorePaint=new Paint (  );
     public static float ratioX=0;
     public static float ratioY=0;
-    private Pilot pilot;
+    private final Pilot pilot;
 
-    private ArrayList<Laser> lasers;
+    private final ArrayList<Laser> lasers;
 
-    private Invader[] invaders;
-    private Random random;
+    private final Invader[] invaders;
+    private final Random random;
 
-    private SharedPreferences preferences;
+    private final SharedPreferences preferences;
 
-    private levelActivity levelActivity;
+    private final levelActivity levelActivity;
 
-    private SoundPool soundPool;
-    private int sound;
+    private final SoundPool soundPool;
+    private final int shoot_sound;
+    private final int ufoPassed;
+    private final int damageTaken;
+
+    // --Commented out by Inspection (14-Jan-20 2:09 PM):private boolean muteSound;
+
+    private final Bitmap[] hp=new Bitmap[2];
+    private int hp_count;
+
+
 
     public gameView ( levelActivity levelActivity, int scX, int scY ) {
         super ( levelActivity );
@@ -70,19 +86,30 @@ public class gameView extends SurfaceView implements Runnable {
             soundPool=new SoundPool ( 1, AudioManager.STREAM_MUSIC,0 );
         }
         //laser shot
-        sound=soundPool.load ( levelActivity, R.raw.shoot,1);
+        shoot_sound=soundPool.load ( levelActivity, R.raw.shoot,1);
+
+        //damage taken
+        damageTaken=soundPool.load ( levelActivity,R.raw.damage,1 );
+        //ufo passing
+        ufoPassed=soundPool.load ( levelActivity,R.raw.ufo,1 );
 
         //Screen Ratio
         ratioX=1920f/scX;
         ratioY=1080f/scY;
 
+        //BG
         bg1=new background ( scX,scY,getResources () );
 
         pilot=new Pilot ( this,scY, getResources () );
 
-        paint=new Paint (  );
-        paint.setTextSize ( 128 );
-        paint.setColor ( Color.WHITE );
+        paint = new Paint (  );
+
+        //score text paint
+        scorePaint.setTextSize ( 50 );
+        scorePaint.setColor ( Color.WHITE );
+        scorePaint.setTypeface ( Typeface.DEFAULT );
+        scorePaint.setAntiAlias ( true );
+        scorePaint.setTextAlign ( Paint.Align.CENTER );
 
         lasers=new ArrayList<> ();
 
@@ -95,6 +122,35 @@ public class gameView extends SurfaceView implements Runnable {
 
         }
         random=new Random (  );
+
+        //convert vector to bitmap
+        Drawable heart1=getResources ().getDrawable ( R.drawable.heart1 );
+        Drawable heart2=getResources ().getDrawable ( R.drawable.heart2 );
+        Drawable mute=getResources ().getDrawable ( R.drawable.volume_off );
+        Drawable unmute=getResources ().getDrawable ( R.drawable.volume_up );
+
+
+        //pilot HP hearts
+        hp[0]=convertDrawableToBitmap ( heart1 );
+        hp[1]=convertDrawableToBitmap ( heart2 );
+
+        hp_count=3;
+
+
+
+    }
+    private static Bitmap convertDrawableToBitmap ( Drawable drawable ) {
+
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable)drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     @Override
@@ -145,9 +201,6 @@ public class gameView extends SurfaceView implements Runnable {
 
             }
 
-
-
-
         }
         //remove lasers from discard
         for (Laser laser: discard) {
@@ -163,6 +216,9 @@ public class gameView extends SurfaceView implements Runnable {
             if(invader.x+invader.w<0){
 
                 if(!invader.shot){
+                    if(preferences.getBoolean ( "mute", false)){
+                        soundPool.play ( ufoPassed,1,1,0,0,1 );
+                    }
                     gameOver=true;
                     return;
                 }
@@ -181,13 +237,20 @@ public class gameView extends SurfaceView implements Runnable {
             }
             //invader hit pilot
             if(Rect.intersects (invader.getCollision (), pilot.getCollision ())) {
-                gameOver=true;
+                if(preferences.getBoolean ( "mute", false)){
+                    soundPool.play ( damageTaken,1,1,0,0,1 );
+
+                }
+                hp_count--;
+                //game over if hp=0
+                if(hp_count==0){
+                    gameOver=true;
+                }
+
                 return;
 
             }
         }
-
-
 
     }
     private void draw () {
@@ -195,31 +258,45 @@ public class gameView extends SurfaceView implements Runnable {
         if(getHolder ().getSurface ().isValid ()){
             Canvas canvas=getHolder ().lockCanvas ();
             canvas.drawBitmap ( bg1.bg,bg1.x,bg1.y,paint );
+            /*UI*/
+            //Score
+            canvas.drawText ( "SCORE: "+score,canvas.getWidth ()/2,60,scorePaint );
 
+            //hp of 3 hearts
+            for(int i=0;i<3;i++){
+                int x=(int) (100+hp[0].getWidth ()*1.5*i);
+                int y=10;
+                if(i<hp_count){
+                    canvas.drawBitmap ( hp[0],x,y,null );
+
+                }else {
+                    canvas.drawBitmap ( hp[1],x,y,null );
+
+                }
+            }
+
+            /*Game Objects*/
+            //draw pilot
             canvas.drawBitmap ( pilot.getPilot (),pilot.x,pilot.y,paint );
-
+            //draw lasers
             for (Laser laser:lasers) {
                 canvas.drawBitmap ( laser.laser,laser.x,laser.y,paint );
             }
-
+            //draw invader ufo
             for (Invader invader:invaders) {
                 canvas.drawBitmap ( invader.getInvader () ,invader.x ,invader.y,paint);
             }
 
 
-            //draw score
-            canvas.drawText ( score+"",scX/2f,164,paint );
-
             if(gameOver){
                 playing=false;
                 //save high score in shared pref
-                saveHighScore();
+                saveScore();
+                getHolder ().unlockCanvasAndPost ( canvas );
                 //wait for few seconds and exit to game over activity
                 waitBeforeExit();
                 return;
             }
-
-
 
             getHolder ().unlockCanvasAndPost ( canvas );
         }
@@ -237,10 +314,10 @@ public class gameView extends SurfaceView implements Runnable {
         }
     }
 
-    private void saveHighScore () {
-        if(preferences.getInt ( "HighScore",0 ) < score){
+    private void saveScore () {
+        if(preferences.getInt ( "Score",0 ) < score){
             SharedPreferences.Editor editor=preferences.edit ();
-            editor.putInt ( "HighScore", score);
+            editor.putInt ( "Score", score);
             editor.apply ();
         }
     }
@@ -292,7 +369,7 @@ public class gameView extends SurfaceView implements Runnable {
     }
     public void newLaser(){
         if(preferences.getBoolean ( "mute", false)){
-            soundPool.play ( sound,1,1,0,0,1 );
+            soundPool.play ( shoot_sound,1,1,0,0,1 );
         }
         Laser laser=new Laser ( getResources () );
         //laser shoots from the front
